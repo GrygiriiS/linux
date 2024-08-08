@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+/plugin/;
+
+&{/} {
+	#address-cells = <0x02>;
+	#size-cells = <0x01>;
+	scmi_sram: sram@3ff00000 {
+		compatible = "mmio-sram";
+		reg = <0x0 0x3ff00000 0x10000>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0 0x0 0x3ff00000 0x10000>;
+
+		scmi_shm: scmi_shm@0 {
+			compatible = "arm,scmi-shmem";
+			reg = <0 0x1000>;
+		};
+	};
+
+	firmware {
+		scmi {
+			compatible = "arm,scmi-smc";
+			arm,smc-id = <0x82000002>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			shmem = <&scmi_shm>;
+
+			scmi_reset: protocol@16 {
+				reg = <0x16>;
+				#reset-cells = <1>;
+			};
+
+			scmi_pinctrl: protocol@19 {
+				reg = <0x19>;
+				#pinctrl-cells = <0>;
+
+				scmi_sdio2_30_pins: scmi_sdio2_30_pins {
+					pin_clk {
+						function = "f_sd2";
+						pins = "gpio30";
+						bias-disable;
+					};
+					pin_cmd {
+						function = "f_sd2";
+						pins = "gpio31";
+						bias-pull-up;
+					};
+					pins_dat {
+						function = "f_sd2";
+						pins = "gpio32", "gpio33", "gpio34", "gpio35";
+						bias-pull-up;
+					};
+				};
+
+				scmi_pwr_button_pins: scmi_pwr_button_pins {
+					function = "gpio";
+					pins = "gpio20";
+					bias-pull-up;
+				};
+
+			};
+		};
+	};
+};
+
+&{/pwr_button/} {
+	pinctrl-0 = <&scmi_pwr_button_pins>;
+};
+
+&pcie1 {
+			resets = <&scmi_reset 0>, <&scmi_reset 1>, <&pcie_rescal>;
+			reset-names = "swinit", "bridge", "rescal";
+};
+
+&pcie2 {
+			resets = <&scmi_reset 2>, <&scmi_reset 3>, <&pcie_rescal>;
+			reset-names = "swinit", "bridge", "rescal";
+	};
+
+&sdio2 {
+	pinctrl-0 = <&scmi_sdio2_30_pins>;
+};

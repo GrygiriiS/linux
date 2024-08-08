@@ -29,6 +29,10 @@ subdir-y	+= bcmbca
 subdir-y	+= northstar2
 subdir-y	+= stingray
 
+ifeq ($(CONFIG_ARCH_BCM2835),y)
+dtb-$(CONFIG_ARM_SCMI_PROTOCOL) += bcm2712-rpi-5-scmi.dtbo
+endif
+
 # Enable fixups to support overlays on BCM2835 platforms
 ifeq ($(CONFIG_ARCH_BCM2835),y)
 	DTC_FLAGS += -@
