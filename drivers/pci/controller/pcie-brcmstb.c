@@ -349,6 +349,7 @@ struct brcm_pcie {
 	struct reset_control	*rescal;
 	struct reset_control	*perst_reset;
 	struct reset_control	*bridge_reset;
+	struct reset_control	*scmi_reset;
 	int			num_memc;
 	u64			memc_size[PCIE_BRCM_MAX_MEMC];
 	u32			hw_rev;
@@ -1914,6 +1915,41 @@ static struct pci_ops brcm7425_pcie_ops = {
 	.remove_bus = brcm_pcie_remove_bus,
 };
 
+ssize_t trig_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d", 0);
+}
+
+ssize_t trig_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct brcm_pcie *pcie;
+	int ret;
+
+	pcie = dev_get_drvdata(dev);
+	dev_warn(dev, "%s: dev=%p pcie=%p", __func__, dev, pcie);
+	if (pcie->scmi_reset == NULL) {
+		dev_err(dev, "No scmi_reset defined");
+		return count;
+	}
+	switch (*buf) {
+	case '0':
+		dev_err(dev, " ----------------->  Asserting 'scmi'\n");
+		ret = reset_control_assert(pcie->scmi_reset);
+		if (ret)
+			dev_err(dev, "failed to deassert 'rescal'\n");
+		break;
+	case '1':
+		dev_err(dev, " ----------------->  Deasserting 'scmi'\n");
+		ret = reset_control_deassert(pcie->scmi_reset);
+		if (ret)
+			dev_err(dev, "failed to deassert 'rescal'\n");
+		break;
+	}
+	return count;
+}
+
+static DEVICE_ATTR(scmi_trig, 0644, trig_show, trig_store);
+
 static int brcm_pcie_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node, *msi_np;
@@ -1977,6 +2013,17 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	if (IS_ERR(pcie->bridge_reset)) {
 		clk_disable_unprepare(pcie->clk);
 		return PTR_ERR(pcie->bridge_reset);
+	}
+	pcie->scmi_reset = devm_reset_control_get(&pdev->dev, "scmi");
+	dev_warn(&pdev->dev, "scmi_reset=%p\n", pcie->scmi_reset);
+	if (IS_ERR(pcie->scmi_reset)) {
+		dev_warn(&pdev->dev, "scmi err=%ld\n", PTR_ERR(pcie->scmi_reset));
+		pcie->scmi_reset = NULL;
+		dev_err(pcie->dev, "No scmi_reset");
+	} else {
+		dev_warn(pcie->dev, " =======> Setup scmi_trig attribute reset=%p pcie=%p", pcie->scmi_reset, pcie);
+		if (device_create_file(&pdev->dev, &dev_attr_scmi_trig))
+			dev_err(&pdev->dev, "can't set scmi_trig erase interface\n");
 	}
 
 	ret = reset_control_deassert(pcie->rescal);
