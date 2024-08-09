@@ -504,6 +504,8 @@ static int pinctrl_scmi_get_pins(struct scmi_pinctrl *pmx,
 	return 0;
 }
 
+#include "pinctrl-scmi-test.c"
+
 static int scmi_pinctrl_probe(struct scmi_device *sdev)
 {
 	int ret;
@@ -548,6 +550,17 @@ static int scmi_pinctrl_probe(struct scmi_device *sdev)
 				      sizeof(*pmx->functions), GFP_KERNEL);
 	if (!pmx->functions)
 		return -ENOMEM;
+
+	/********************/
+//	ret = run_tests(pmx->pctldev);
+//	if (ret) {
+//		printk("TESTS FAILED!\n");
+//		return -EINVAL;
+//	}
+//
+//	printk("TESTS PASSED!\n");
+//	return -EINVAL;
+	/**********************/
 
 	return pinctrl_enable(pmx->pctldev);
 }
