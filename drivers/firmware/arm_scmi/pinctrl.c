@@ -5,7 +5,7 @@
  * Copyright (C) 2024 EPAM
  * Copyright 2024 NXP
  */
-
+#define DEBUG 1
 #include <asm/byteorder.h>
 #include <linux/bits.h>
 #include <linux/bitfield.h>
@@ -840,6 +840,8 @@ static const struct scmi_pinctrl_proto_ops pinctrl_proto_ops = {
 	.pin_free = scmi_pinctrl_pin_free,
 };
 
+#include "pinctrl-test.c"
+
 static int scmi_pinctrl_protocol_init(const struct scmi_protocol_handle *ph)
 {
 	int ret;
@@ -877,6 +879,16 @@ static int scmi_pinctrl_protocol_init(const struct scmi_protocol_handle *ph)
 		return -ENOMEM;
 
 	pinfo->version = version;
+	/********************/
+/*	ph->set_priv(ph, pinfo, version);
+	ret = run_tests(ph);
+	if (ret) {
+		printk("TESTS FAILED!\n");
+		return -EINVAL;
+	}
+
+	printk("TESTS PASSED!\n");*/
+	/*******************/
 
 	return ph->set_priv(ph, pinfo, version);
 }
