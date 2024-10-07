@@ -8,6 +8,10 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 
+#if defined(V4H_ARM_SCMI)
+#define sysc scmi_pd
+#endif /* V4H_ARM_SCMI */
+
 #include "r8a779g0.dtsi"
 
 / {
@@ -70,6 +74,11 @@
 			#size-cells = <0>;
 			#access-controller-cells = <1>;
 			shmem = <&scmi_shm_0>;
+
+			scmi_pd: protocol@11 {
+				reg = <0x11>;
+				#power-domain-cells = <1>;
+			};
 		};
 	};
 #endif /* V4H_ARM_SCMI */

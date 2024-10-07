@@ -653,13 +653,13 @@
 			compatible = "renesas,r8a779g0-rst";
 			reg = <0 0xe6160000 0 0x4000>;
 		};
-
+#if !defined(V4H_ARM_SCMI)
 		sysc: system-controller@e6180000 {
 			compatible = "renesas,r8a779g0-sysc";
 			reg = <0 0xe6180000 0 0x4000>;
 			#power-domain-cells = <1>;
 		};
-
+#endif /* V4H_ARM_SCMI */
 		tsn0: ethernet@e6460000 {
 			compatible = "renesas,ethertsn-r8a779g0";
 			reg = <0 0xe6460000 0 0x7000>,
