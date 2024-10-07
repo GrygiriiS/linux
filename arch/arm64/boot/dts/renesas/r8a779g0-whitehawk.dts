@@ -6,6 +6,10 @@
  */
 
 /dts-v1/;
+
+/* Uncomment to enable ARM SCMI support */
+#define V4H_ARM_SCMI
+
 #include "r8a779g0-whitehawk-cpu.dtsi"
 #include <dt-bindings/media/r8a779g0-csi2.h>
 

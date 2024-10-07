@@ -55,6 +55,25 @@
 			regulator-boot-on;
 			regulator-always-on;
 	};
+
+#if defined(V4H_ARM_SCMI)
+	scmi_shm_0: sram@47ff0000 {
+		compatible = "arm,scmi-shmem";
+		reg = <0x0 0x47ff0000 0x0 0x1000>;
+	};
+
+	firmware {
+		scmi: scmi {
+			compatible = "arm,scmi-smc";
+			arm,smc-id = <0x82000002>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			#access-controller-cells = <1>;
+			shmem = <&scmi_shm_0>;
+		};
+	};
+#endif /* V4H_ARM_SCMI */
+
 };
 
 &extal_clk {
