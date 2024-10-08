@@ -79,6 +79,11 @@
 				reg = <0x11>;
 				#power-domain-cells = <1>;
 			};
+
+			scmi_reset: protocol@16 {
+				reg = <0x16>;
+				#reset-cells = <1>;
+			};
 		};
 	};
 #endif /* V4H_ARM_SCMI */
